@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mini Games Selector</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 40px;
+    }
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      width: 100%;
+      max-width: 300px;
+    }
+    .btn {
+      background-color: #28a745;
+      padding: 15px;
+      font-size: 1.5rem;
+      color: white;
+      border-radius: 12px;
+      text-decoration: none;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+    .btn:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+  <h1>Select Your Game</h1>
+  <div class="button-container">
+    <a href="snake-mobile/index.html" class="btn">🐍 Play Snake</a>
+    <a href="xo/index.html" class="btn">❌⭕ Play Tic Tac Toe</a>
+  </div>
+</body>
+</html>

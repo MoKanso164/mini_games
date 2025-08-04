@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tic Tac Toe - Mobile Enhanced</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: white;
+    text-align: center;
+  }
+  .container {
+    width: 90vw;
+    max-width: 400px;
+    position: relative;
+  }
+  h1 {
+    margin-bottom: 20px;
+    font-size: 2.5rem;
+  }
+  .board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    background: #2c3e50;
+    padding: 10px;
+    border-radius: 12px;
+    position: relative;
+  }
+  .cell {
+    background: #34495e;
+    border-radius: 12px;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 4rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+    font-weight: 700;
+  }
+  .cell:hover {
+    background-color: #3d566e;
+  }
+  .status {
+    margin: 15px 0 5px 0;
+    font-size: 1.2rem;
+    min-height: 1.5em;
+    font-weight: 600;
+    transition: color 0.3s ease;
+  }
+  /* Colors for players */
+  .status.playerX {
+    color: #ff4d4d; /* red for X */
+  }
+  .status.playerO {
+    color: #4d79ff; /* blue for O */
+  }
+  /* Player colors in cells */
+  .cell.X {
+    color: #ff4d4d;
+  }
+  .cell.O {
+    color: #4d79ff;
+  }
+  /* Pass message style */
+  .pass-message {
+    font-size: 1rem;
+    margin: 10px 0 20px 0;
+    color: #ffd700;
+    font-weight: 700;
+    user-select: none;
+    animation: fadeInOut 3s forwards;
+    display: none;
+  }
+  @keyframes fadeInOut {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  button {
+    background: #764ba2;
+    border: none;
+    padding: 12px 20px;
+    font-size: 1rem;
+    border-radius: 25px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background: #5a3481;
+  }
+  /* Canvas for winning line */
+  #winLineCanvas {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: calc(100% - 20px);
+    height: calc(100% - 20px);
+    pointer-events: none;
+  }
+  /* Countdown overlay */
+  #countdownOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    color: white;
+    font-size: 6rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>❌⭕ Tic Tac Toe</h1>
+  <div id="board" class="board">
+    <canvas id="winLineCanvas"></canvas>
+    <div class="cell" data-index="0"></div>
+    <div class="cell" data-index="1"></div>
+    <div class="cell" data-index="2"></div>
+    <div class="cell" data-index="3"></div>
+    <div class="cell" data-index="4"></div>
+    <div class="cell" data-index="5"></div>
+    <div class="cell" data-index="6"></div>
+    <div class="cell" data-index="7"></div>
+    <div class="cell" data-index="8"></div>
+  </div>
+  <p id="status" class="status playerX">Player X's turn</p>
+  <p id="passMessage" class="pass-message"></p>
+  <button id="restartBtn" disabled>Restart Game</button>
+
+  <div id="countdownOverlay">3</div>
+</div>
+
+<script>
+  const board = document.getElementById("board");
+  const cells = document.querySelectorAll(".cell");
+  const status = document.getElementById("status");
+  const passMessage = document.getElementById("passMessage");
+  const restartBtn = document.getElementById("restartBtn");
+  const countdownOverlay = document.getElementById("countdownOverlay");
+  const winLineCanvas = document.getElementById("winLineCanvas");
+  const ctx = winLineCanvas.getContext("2d");
+
+  // Resize canvas to board size
+  function resizeCanvas() {
+    winLineCanvas.width = board.clientWidth;
+    winLineCanvas.height = board.clientHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  let boardState = Array(9).fill(null);
+  let currentPlayer = "X";
+  let gameActive = false; // start disabled for countdown
+
+  const winningCombos = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+
+  function drawWinLine(combo) {
+    ctx.clearRect(0, 0, winLineCanvas.width, winLineCanvas.height);
+    ctx.strokeStyle = currentPlayer === "X" ? "#ff4d4d" : "#4d79ff";
+    ctx.lineWidth = 6;
+    ctx.lineCap = "round";
+
+    // Calculate center of cells for line
+    function getCellCenter(index) {
+      const cell = cells[index];
+      const rect = cell.getBoundingClientRect();
+      const boardRect = board.getBoundingClientRect();
+      return {
+        x: rect.left - boardRect.left + rect.width / 2,
+        y: rect.top - boardRect.top + rect.height / 2,
+      };
+    }
+
+    const start = getCellCenter(combo[0]);
+    const end = getCellCenter(combo[2]);
+
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    ctx.lineTo(end.x, end.y);
+    ctx.stroke();
+  }
+
+  function handleCellClick(e) {
+    if (!gameActive) return;
+    const index = e.target.getAttribute("data-index");
+    if (boardState[index]) return;
+
+    boardState[index] = currentPlayer;
+    e.target.textContent = currentPlayer;
+    e.target.classList.add(currentPlayer);
+
+    if (checkWin(currentPlayer)) {
+      status.textContent = `Player ${currentPlayer} wins! 🎉`;
+      status.className = "status";
+      passMessage.style.display = "none";
+      gameActive = false;
+      restartBtn.disabled = false;
+      // Draw line
+      const winCombo = winningCombos.find(combo =>
+        combo.every(i => boardState[i] === currentPlayer)
+      );
+      drawWinLine(winCombo);
+      return;
+    }
+
+    if (boardState.every(cell => cell !== null)) {
+      status.textContent = "It's a draw! 🤝";
+      status.className = "status";
+      passMessage.style.display = "none";
+      gameActive = false;
+      restartBtn.disabled = false;
+      return;
+    }
+
+    currentPlayer = currentPlayer === "X" ? "O" : "X";
+    updateStatusAndPassMessage();
+  }
+
+  function checkWin(player) {
+    return winningCombos.some(combo =>
+      combo.every(index => boardState[index] === player)
+    );
+  }
+
+  function restartGame() {
+    boardState.fill(null);
+    cells.forEach(cell => {
+      cell.textContent = "";
+      cell.classList.remove("X", "O");
+    });
+    currentPlayer = "X";
+    gameActive = false;
+    status.className = "status playerX";
+    passMessage.style.display = "none";
+    restartBtn.disabled = true;
+    ctx.clearRect(0, 0, winLineCanvas.width, winLineCanvas.height);
+    startCountdown();
+  }
+
+  function updateStatusAndPassMessage() {
+    status.textContent = `Player ${currentPlayer}'s turn`;
+    status.className = `status player${currentPlayer}`;
+    passMessage.textContent = `Pass the phone to Player ${currentPlayer}`;
+    passMessage.style.display = "block";
+
+    setTimeout(() => {
+      passMessage.style.display = "none";
+    }, 3000);
+  }
+
+  // Countdown logic
+  function startCountdown() {
+    let count = 3;
+    countdownOverlay.style.display = "flex";
+    countdownOverlay.textContent = count;
+    const interval = setInterval(() => {
+      count--;
+      if (count === 0) {
+        clearInterval(interval);
+        countdownOverlay.style.display = "none";
+        gameActive = true;
+        updateStatusAndPassMessage();
+      } else {
+        countdownOverlay.textContent = count;
+      }
+    }, 1000);
+  }
+
+  cells.forEach(cell => cell.addEventListener("click", handleCellClick));
+  restartBtn.addEventListener("click", restartGame);
+
+  // Start countdown on load
+  restartBtn.disabled = true;
+  startCountdown();
+</script>
+</div>
+</body>
+</html>

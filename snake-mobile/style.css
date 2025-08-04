@@ -1,0 +1,92 @@
+/* Reset box sizing */
+* {
+  box-sizing: border-box;
+}
+
+/* Body & container */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);
+  color: white;
+  display: flex;
+  justify-content: center;
+  height: 100vh;
+  align-items: center;
+  text-align: center;
+}
+
+.container {
+  width: 90%;
+  max-width: 400px;
+  padding: 20px;
+}
+
+/* Title */
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+}
+
+/* Score */
+.score {
+  font-size: 1.3rem;
+  margin: 0 0 10px 0;
+  color: #ffdf00;
+  font-weight: 600;
+}
+
+/* Canvas styling */
+canvas {
+  background: #000;
+  border-radius: 10px;
+  border: 3px solid white;
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  margin-bottom: 20px;
+  display: block;
+  box-shadow: 0 0 20px #28a745;
+}
+
+/* Controls container */
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+/* Middle row inside controls */
+.middle-row {
+  display: flex;
+  gap: 18px;
+}
+
+/* Buttons */
+.control-btn {
+  background: #28a745;
+  border: none;
+  color: white;
+  font-size: 2rem;
+  padding: 12px 25px;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 6px #1c7a35;
+  transition: all 0.15s ease-in-out;
+  user-select: none;
+}
+
+.control-btn:active {
+  transform: scale(0.94);
+  box-shadow: 0 3px #155d27;
+}
+
+/* Info text */
+.info {
+  font-size: 1rem;
+  opacity: 0.75;
+  user-select: none;
+}
